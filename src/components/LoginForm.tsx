@@ -1,20 +1,24 @@
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { login } from "../features/auth/authSlice";
+import { useNavigate } from "react-router-dom";
+import { useAppSelector, useAppDispatch } from "../app/hooks";
+import { checkCredAndAddToken, loginInitial } from "../features/auth/authSlice";
 import { selectAuthError } from "../features/auth/authSelectors";
 import { useTranslation } from "react-i18next";
-import { TextField, Button, Box, Link } from "@mui/material";
+import { TextField, Button, Box, Link, Typography } from "@mui/material";
 
 const LoginForm = () => {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const error = useSelector(selectAuthError);
+  const error = useAppSelector(selectAuthError);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(login({ email, password }));
+    dispatch(loginInitial({ email, password }));
+    dispatch(checkCredAndAddToken({ email, password }));
+    navigate("/success");
   };
 
   return (
@@ -37,7 +41,13 @@ const LoginForm = () => {
         fullWidth
         margin="normal"
       />
-      {error && <div>{error}</div>}
+      {error && (
+        <Box>
+          <Typography color="error" variant="body1">
+            {error && t("invalidCredentials")}
+          </Typography>
+        </Box>
+      )}
       <Box display="flex" justifyContent="center" marginTop={2}>
         <Button type="submit" variant="contained" fullWidth>
           {t("login")}

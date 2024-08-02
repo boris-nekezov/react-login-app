@@ -12,5 +12,14 @@
 
 http://localhost:5173/
 
-
 https://github.com/reduxjs/redux-templates/tree/master/packages/vite-template-redux
+
+## Test user:
+
+```
+email:
+user1@example.com
+
+password:
+password123
+```

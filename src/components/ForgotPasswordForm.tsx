@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useAppSelector, useAppDispatch } from "../app/hooks";
 import { validateEmail } from "../features/auth/authSlice";
 import { selectAuthError } from "../features/auth/authSelectors";
 import { useTranslation } from "react-i18next";
-import { TextField, Button, Box } from "@mui/material";
+import { TextField, Button, Box, Typography } from "@mui/material";
 
 const ForgotPasswordForm = () => {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [email, setEmail] = useState("");
-  const error = useSelector(selectAuthError);
+  const error = useAppSelector(selectAuthError);
   const [success, setSuccess] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -31,7 +31,13 @@ const ForgotPasswordForm = () => {
         fullWidth
         margin="normal"
       />
-      {error && <div>{error}</div>}
+      {error && (
+        <Box>
+          <Typography color="error" variant="body1">
+            {error && t("invalidCredentials")}
+          </Typography>
+        </Box>
+      )}
       <Box display="flex" justifyContent="center" marginTop={2}>
         <Button type="submit" variant="contained" fullWidth>
           {t("submit")}

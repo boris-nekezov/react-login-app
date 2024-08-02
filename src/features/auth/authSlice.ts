@@ -1,60 +1,80 @@
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import users from "../../data/users.json";
-
-interface AuthState {
-  isAuthenticated: boolean;
-  email: string;
-  error: string | null;
-}
+import type { AuthState, LoginPayload } from "./types";
+import { generateToken, saveTokenToLocalStorage } from "./services"; // Импорт на services.ts
 
 const initialState: AuthState = {
   isAuthenticated: false,
   email: "",
-  error: null,
+  error: false,
 };
+
+export const checkCredAndAddToken = createAsyncThunk(
+  "auth/login",
+  async (payload: LoginPayload, { rejectWithValue }) => {
+    const user = users.find(
+      user =>
+        user.email === payload.email && user.password === payload.password,
+    );
+
+    if (user) {
+      try {
+        const token = await generateToken(user.email);
+        saveTokenToLocalStorage(token);
+        return { email: payload.email, token };
+      } catch (error) {
+        return rejectWithValue("Error generating token");
+      }
+    } else {
+      return rejectWithValue("Invalid credentials");
+    }
+  },
+);
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    // login
-    login: (
-      state,
-      action: PayloadAction<{
-        email: string;
-        password: string;
-      }>,
-    ) => {
+    loginInitial: (state, action: PayloadAction<LoginPayload>) => {
       const user = users.find(
         user =>
           user.email === action.payload.email &&
           user.password === action.payload.password,
       );
-
       if (user) {
         state.isAuthenticated = true;
         state.email = action.payload.email;
-        state.error = null;
+        state.error = false;
+        window.location.href = "/success";
       } else {
-        state.error = "Invalid credentials";
+        state.error = true;
       }
     },
-
-    // logout
     logout: state => {
       state.isAuthenticated = false;
       state.email = "";
-      state.error = null;
+      state.error = false;
+      localStorage.removeItem("authToken");
     },
 
-    // validateEmail
     validateEmail: (state, action: PayloadAction<string>) => {
       const user = users.find(user => user.email === action.payload);
-      state.error = user ? null : "Invalid email";
+      state.error = user ? false : true;
     },
+  },
+  extraReducers: builder => {
+    builder
+      .addCase(checkCredAndAddToken.fulfilled, (state, action) => {
+        state.isAuthenticated = true;
+        state.email = action.payload.email;
+        state.error = false;
+      })
+      .addCase(checkCredAndAddToken.rejected, (state, action) => {
+        state.error = true;
+      });
   },
 });
 
-export const { login, logout, validateEmail } = authSlice.actions;
+export const { loginInitial, logout, validateEmail } = authSlice.actions;
 export default authSlice.reducer;
