@@ -1,5 +1,18 @@
 # React login app
 
+## Features
+
+- Login
+- Logout
+- Hashed credentials saved to local storage to remain logged in after refresh
+
+## Technologies
+
+- Redux toolkit
+- JSON web token
+- JOSE
+- Material UI
+
 ## Scripts
 
 - `npm install` - install dependencies
@@ -12,5 +25,21 @@
 
 http://localhost:5173/
 
+## Test users:
 
-https://github.com/reduxjs/redux-templates/tree/master/packages/vite-template-redux
+```json
+[
+  {
+    "email": "user1@example.com",
+    "password": "password123@"
+  },
+  {
+    "email": "user2@example.com",
+    "password": "password456"
+  },
+  {
+    "email": "user3@example.com",
+    "password": "password789"
+  }
+]
+```
